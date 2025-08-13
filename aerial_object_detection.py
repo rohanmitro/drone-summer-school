@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def detect_multiple_objects(image_path: str, min_area: int = 500):
+def detect_multiple_objects(image_path: str, min_area: int = 500, output_path: str = 'multiple_objects_detected.jpg'):
     """
     Detects multiple objects in an image and draws bounding boxes around them.
 
@@ -66,11 +66,18 @@ def detect_multiple_objects(image_path: str, min_area: int = 500):
         print(f"Object {i+1}: Bounding box at ({x}, {y}) with size {w}x{h}")
 
     # 7. Save the final image
-    cv2.imwrite('multiple_objects_detected.jpg', output_image)
+    cv2.imwrite(output_path, output_image)
 
     print("Detection complete! Check the output file: 'multiple_objects_detected.jpg'.")
 
 
 if __name__ == '__main__':
-    # change the file path below.
-    detect_multiple_objects('Training Data/zebra/zebra1.jpg')
+    # Add system arguments to pass the file path.
+    import argparse
+    parser = argparse.ArgumentParser(description='Detect multiple objects in an image.')
+    parser.add_argument('--image_path', type=str, required=True, help='Path to the input image')
+    parser.add_argument('--min_area', type=int, default=100, help='Minimum area of the object to be detected')
+    parser.add_argument('--output_path', type=str, default='multiple_objects_detected.jpg', help='Path to the output image')
+    
+    args = parser.parse_args()
+    detect_multiple_objects(args.image_path, args.min_area, args.output_path)
