@@ -105,6 +105,8 @@ from tqdm import tqdm
 from torchvision import datasets, transforms, models
 from torchvision.models import ResNet18_Weights, EfficientNet_B0_Weights
 
+import pdb
+
 # -----------------------------
 # Utilities
 # -----------------------------
@@ -171,12 +173,14 @@ def build_datasets(cfg: TrainConfig):
     # Choose weights to get the right normalization + transforms
     if cfg.model == "resnet18":
         weights = ResNet18_Weights.DEFAULT
-        base_transforms = weights.transforms()
-        mean, std = weights.meta["mean"], weights.meta["std"]
+        # ImageNet normalization values
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
     elif cfg.model == "efficientnet_b0":
         weights = EfficientNet_B0_Weights.DEFAULT
-        base_transforms = weights.transforms()
-        mean, std = weights.meta["mean"], weights.meta["std"]
+        # ImageNet normalization values
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
     else:
         raise ValueError("Unsupported model. Choose 'resnet18' or 'efficientnet_b0'.")
 
@@ -449,18 +453,22 @@ def load_model_for_inference(checkpoint: str, device: str):
     model.load_state_dict(state['model_state'])
     model.to(device)
     model.eval()
-
     # get matching eval transforms
     if backbone == "resnet18":
         weights = ResNet18_Weights.DEFAULT
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
     else:
         weights = EfficientNet_B0_Weights.DEFAULT
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
     eval_tfms = transforms.Compose([
         transforms.Resize(int(224 * 1.14)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=weights.meta["mean"], std=weights.meta["std"]),
+        transforms.Normalize(mean=mean, std=std),
     ])
+    
 
     return model, idx_to_class, eval_tfms
 
